@@ -1,0 +1,67 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+typedef struct {
+    char src[4];
+    char dst[4];
+} Ticket;
+typedef struct Node {
+    char dst[4];
+    int visited;
+    struct Node* next;
+} Node;
+int compareTickets(const void* a, const void* b) {
+    Ticket* t1 = (Ticket*)a;
+    Ticket* t2 = (Ticket*)b;
+    int cmp = strcmp(t1->src, t2->src);
+    if (cmp == 0) {
+        return strcmp(t1->dst, t2->dst);
+    }
+    return cmp;
+}
+int getHash(const char* str) {
+    return ((str[0] - 'A') * 676) + ((str[1] - 'A') * 26) + (str[2] - 'A');
+}
+Node* graph[18516]; 
+char** itinerary;
+int itineraryIdx;
+void dfs(const char* airport) {
+    int u = getHash(airport);
+    Node* curr = graph[u];
+    
+    while (curr != NULL) {
+        if (!curr->visited) {
+            curr->visited = 1; 
+            dfs(curr->dst);
+        }
+        curr = curr->next;
+    }
+    strcpy(itinerary[itineraryIdx--], airport);
+}
+
+char** findItinerary(char*** tickets, int ticketsSize, int* ticketsColSize, int* returnSize) {
+    Ticket* tList = (Ticket*)malloc(ticketsSize * sizeof(Ticket));
+    for (int i = 0; i < ticketsSize; i++) {
+        strcpy(tList[i].src, tickets[i][0]);
+        strcpy(tList[i].dst, tickets[i][1]);
+    }
+    qsort(tList, ticketsSize, sizeof(Ticket), compareTickets);
+    memset(graph, 0, sizeof(graph));
+    for (int i = ticketsSize - 1; i >= 0; i--) {
+        int u = getHash(tList[i].src);
+        Node* newNode = (Node*)malloc(sizeof(Node));
+        strcpy(newNode->dst, tList[i].dst);
+        newNode->visited = 0;
+        newNode->next = graph[u];
+        graph[u] = newNode;
+    }
+    *returnSize = ticketsSize + 1;
+    itinerary = (char**)malloc((*returnSize) * sizeof(char*));
+    for (int i = 0; i < *returnSize; i++) {
+        itinerary[i] = (char*)malloc(4 * sizeof(char));
+    }
+    itineraryIdx = ticketsSize; 
+    dfs("JFK");
+    free(tList);  
+    return itinerary;
+}
