@@ -1,0 +1,46 @@
+bool isMatch(char* s, int start, char* word, int wordLen) {
+    for (int i = 0; i < wordLen; i++) {
+        if (s[start + i] != word[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+void backtrack(char* s, int start, int sLen, char** wordDict, int wordDictSize, 
+               char* currentSentence, int currLen, char*** results, int* count, int* capacity) {
+    if (start == sLen) {
+        if (*count >= *capacity) {
+            *capacity *= 2;
+            *results = realloc(*results, (*capacity) * sizeof(char*));
+        }
+        char* finalSentence = malloc((currLen) * sizeof(char));
+        strncpy(finalSentence, currentSentence, currLen - 1);
+        finalSentence[currLen - 1] = '\0';
+        (*results)[*count] = finalSentence;
+        (*count)++;
+        return;
+    }
+    for (int i = 0; i < wordDictSize; i++) {
+        int wordLen = strlen(wordDict[i]);
+        if (start + wordLen <= sLen && isMatch(s, start, wordDict[i], wordLen)) {
+            int nextLen = currLen;
+            for (int j = 0; j < wordLen; j++) {
+                currentSentence[nextLen++] = wordDict[i][j];
+            }
+            currentSentence[nextLen++] = ' '; 
+            backtrack(s, start + wordLen, sLen, wordDict, wordDictSize, 
+                      currentSentence, nextLen, results, count, capacity);
+        }
+    }
+}
+char** wordBreak(char* s, char** wordDict, int wordDictSize, int* returnSize) {
+    int sLen = strlen(s);
+    int capacity = 10;
+    int count = 0;
+    char** results = malloc(capacity * sizeof(char*));
+    char* currentSentence = malloc((2 * sLen + 2) * sizeof(char));
+    backtrack(s, 0, sLen, wordDict, wordDictSize, currentSentence, 0, &results, &count, &capacity);
+    free(currentSentence);
+    *returnSize = count;
+    return results;
+}
