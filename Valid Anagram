@@ -1,0 +1,18 @@
+bool isAnagram(char* s, char* t) {
+    int lenS = strlen(s);
+    int lenT = strlen(t);
+    if (lenS != lenT) {
+        return false;
+    }
+    int charCounts[26] = {0};
+    for (int i = 0; i < lenS; i++) {
+        charCounts[s[i] - 'a']++;
+        charCounts[t[i] - 'a']--;
+    }
+    for (int i = 0; i < 26; i++) {
+        if (charCounts[i] != 0) {
+            return false;
+        }
+    }  
+    return true;
+}
