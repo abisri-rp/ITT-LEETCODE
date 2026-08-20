@@ -1,0 +1,24 @@
+class Solution(object):
+    def getSubarrayBeauty(self, nums, k, x):
+        ans = []
+        freq = [0] * 51
+        def get_xth_negative():
+            count = 0
+            for i in range(50): 
+                count += freq[i]
+                if count >= x:
+                    return i - 50
+            return 0
+        for i in range(k):
+            if nums[i] < 0:
+                freq[nums[i] + 50] += 1
+        ans.append(get_xth_negative())
+        for i in range(k, len(nums)):
+            out_elem = nums[i - k]
+            if out_elem < 0:
+                freq[out_elem + 50] -= 1
+            in_elem = nums[i]
+            if in_elem < 0:
+                freq[in_elem + 50] += 1
+            ans.append(get_xth_negative())
+        return ans
